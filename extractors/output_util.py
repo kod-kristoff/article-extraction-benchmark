@@ -1,6 +1,7 @@
 import contextlib
 import json
 import re
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -18,6 +19,8 @@ def wrap_output(
 def write_output_json(
     path: Path, *, output: Dict[str, Dict[str, Any]], version: Optional[str]
 ) -> None:
+    if version is None:
+        print("WARN version is None", file=sys.stderr)
     path.write_text(
         json.dumps(
             wrap_output(output=output, version=version),
@@ -46,10 +49,8 @@ def python_dist_version(dist_name: str) -> Optional[str]:
         return None
 
 
-_GO_REQUIRE_RE = re.compile(
-    r"^\\s*require\\s+(?P<module>\\S+)\\s+(?P<version>\\S+)\\s*$"
-)
-_GO_BLOCK_ENTRY_RE = re.compile(r"^\\s*(?P<module>\\S+)\\s+(?P<version>\\S+)\\s*$")
+_GO_REQUIRE_RE = re.compile(r"^\s*require\s+(?P<module>\S+)\s+(?P<version>\S+)\s*$")
+_GO_BLOCK_ENTRY_RE = re.compile(r"^\s*(?P<module>\S+)\s+(?P<version>\S+)\s*$")
 
 
 def go_mod_dep_version(go_mod_path: Path, module_path: str) -> Optional[str]:
@@ -124,17 +125,23 @@ def cargo_lock_package_version(
 
 def _cargo_field(block: str, field: str) -> Optional[str]:
     m = re.search(
-        rf"^{re.escape(field)}\\s*=\\s*\"([^\"]+)\"\\s*$", block, flags=re.MULTILINE
+        rf"^{re.escape(field)}\s*=\s*\"([^\"]+)\"\s*$", block, flags=re.MULTILINE
     )
     return m.group(1) if m else None
 
 
 @contextlib.contextmanager
 def timer(tool: str, lang: str) -> Any:
-    start = time.perf_counter()
+    start = time.perf_counter_ns()
     yield
-    elapsed = time.perf_counter() - start
-    with Path(f"timings-{time.strftime('%Y-%m-%d')}.md").open(
-        "at", encoding="utf-8"
-    ) as fp:
-        print(f"`{tool}` | {lang} | {1000 * elapsed:.3f}ms", file=fp)
+    elapsed_ns = time.perf_counter_ns() - start
+    try:
+        with Path("output/timings.json").open(encoding="utf-8") as fp:
+            timings = json.load(fp)
+    except Exception:
+        timings = {}
+    if tool not in timings:
+        timings[tool] = {"tool": tool, "language": lang, "timings_ns": []}
+    timings[tool]["timings_ns"].append(elapsed_ns)
+    with Path("output/timings.json").open("w", encoding="utf-8") as fp:
+        json.dump(timings, fp, sort_keys=True, ensure_ascii=False, indent=4)
