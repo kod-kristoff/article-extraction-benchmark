@@ -1,85 +1,94 @@
 #!/usr/bin/env python3
 import argparse
-from collections import Counter
 import json
-from pathlib import Path
 import random
 import re
 import statistics
-from typing import Any, Dict, Tuple, List
+from collections import Counter
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 
 def main():
-    """ Perform evaluation for all ``output/*.json`` files,
+    """Perform evaluation for all ``output/*.json`` files,
     loading ground truth from ``groud-truth.json``.
     Python3.6+ is required.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--n-bootstrap', type=int, default=1000)
-    parser.add_argument('--bootstrap-differences', action='store_true',
-                        help='run bootstrap for differences')
-    parser.add_argument('--output', type=Path, help='output results as json')
+    parser.add_argument("--n-bootstrap", type=int, default=1000)
+    parser.add_argument(
+        "--bootstrap-differences",
+        action="store_true",
+        help="run bootstrap for differences",
+    )
+    parser.add_argument("--output", type=Path, help="output results as json")
     args = parser.parse_args()
-    ground_truth = load_json(Path('ground-truth.json'))
+    ground_truth = load_json(Path("ground-truth.json"))
     metrics_by_name = {}
 
     print(
-        f'{"":<20} {"version":<12} {"F1":<13}  {"precision":<13}  {"recall":<13}  {"accuracy":<13}'
+        f"{'':<20} {'version':<12} {'F1':<13}  {'precision':<13}  {'recall':<13}  {'accuracy':<13}"
     )
-    for path in sorted(Path('output').glob('*.json')):
+    for path in sorted(Path("output").glob("*.json")):
         name = path.stem
         prediction, version = load_prediction(path)
         metrics = evaluate(ground_truth, prediction, args.n_bootstrap)
-        print('{name:<20} {version:<12} '
-              '{f1:.3f} ± {f1_std:.3f}  '
-              '{precision:.3f} ± {precision_std:.3f}  '
-              '{recall:.3f} ± {recall_std:.3f}  '
-              '{accuracy:.3f} ± {accuracy_std:.3f}'
-              .format(name=name, version=version, **metrics))
+        print(
+            "{name:<20} {version:<12} "
+            "{f1:.3f} ± {f1_std:.3f}  "
+            "{precision:.3f} ± {precision_std:.3f}  "
+            "{recall:.3f} ± {recall_std:.3f}  "
+            "{accuracy:.3f} ± {accuracy_std:.3f}".format(
+                name=name, version=version, **metrics
+            )
+        )
         metrics["version"] = version
         metrics_by_name[name] = metrics
 
     if args.bootstrap_differences:
         # check differences with bootstrap
         for name, metrics in sorted(metrics_by_name.items()):
-            tp_fp_fns = metrics['tp_fp_fns']
+            tp_fp_fns = metrics["tp_fp_fns"]
             for other_name, other_metrics in sorted(metrics_by_name.items()):
                 if name >= other_name:
                     continue
-                print(f'Comparison: {name} minus {other_name}')
-                other_tp_fp_fns = other_metrics['tp_fp_fns']
+                print(f"Comparison: {name} minus {other_name}")
+                other_tp_fp_fns = other_metrics["tp_fp_fns"]
                 print_metrics_diff(tp_fp_fns, other_tp_fp_fns, args.n_bootstrap)
 
     if args.output:
-        args.output.write_text(
-            json.dumps(metrics_by_name, indent=4, sort_keys=True))
+        args.output.write_text(json.dumps(metrics_by_name, indent=4, sort_keys=True))
 
 
 def load_prediction(path: Path) -> Tuple[Dict[str, Dict], str]:
     data = load_json(path)
-    if isinstance(data, dict) and set(data.keys()) == {"version", "output"} and isinstance(data.get("output"), dict):
+    if (
+        isinstance(data, dict)
+        and set(data.keys()) == {"version", "output"}
+        and isinstance(data.get("output"), dict)
+    ):
         version = data.get("version") or ""
         return data["output"], str(version)
     return data, ""
 
 
 def evaluate(
-        ground_truth: Dict[str, Dict],
-        prediction: Dict[str, Dict],
-        n_bootstrap: int,
-        ) -> Dict[str, Any]:
+    ground_truth: Dict[str, Dict],
+    prediction: Dict[str, Dict],
+    n_bootstrap: int,
+) -> Dict[str, Any]:
     if ground_truth.keys() != prediction.keys():
-        raise ValueError('prediction keys do not match ground truth')
+        raise ValueError("prediction keys do not match ground truth")
     tp_fp_fns = []
     accuracies = []
     for key in ground_truth.keys():
-        true = ground_truth[key].get('articleBody', '')
-        pred = prediction[key].get('articleBody', '')
+        true = ground_truth[key].get("articleBody", "")
+        pred = prediction[key].get("articleBody", "")
         tp_fp_fns.append(string_shingle_matching(true=true, pred=pred))
         accuracies.append(get_accuracy(true=true, pred=pred))
     metrics: Dict[str, Any] = metrics_from_tp_fp_fns(tp_fp_fns)
-    metrics['tp_fp_fns'] = tp_fp_fns
-    metrics['accuracy'] = statistics.mean(accuracies)
+    metrics["tp_fp_fns"] = tp_fp_fns
+    metrics["accuracy"] = statistics.mean(accuracies)
 
     # add bootstrap estimates of condifence intervals
     b_values: Dict[str, List[float]] = {}
@@ -89,10 +98,11 @@ def evaluate(
         b_metrics = metrics_from_tp_fp_fns([tp_fp_fns[i] for i in indices])
         for key in b_metrics:
             b_values.setdefault(key, []).append(b_metrics[key])
-        b_values.setdefault('accuracy', []).append(
-            statistics.mean([accuracies[i] for i in indices]))
+        b_values.setdefault("accuracy", []).append(
+            statistics.mean([accuracies[i] for i in indices])
+        )
     for key, values in sorted(b_values.items()):
-        metrics[f'{key}_std'] = statistics.stdev(values) if len(values) > 1 else 0.0
+        metrics[f"{key}_std"] = statistics.stdev(values) if len(values) > 1 else 0.0
 
     return metrics
 
@@ -103,47 +113,46 @@ def print_metrics_diff(tp_fp_fns, other_tp_fp_fns, n_bootstrap):
         n = len(tp_fp_fns)
         indices = [random.randint(0, n - 1) for _ in range(n)]
         metrics = metrics_from_tp_fp_fns([tp_fp_fns[i] for i in indices])
-        other_metrics = metrics_from_tp_fp_fns(
-            [other_tp_fp_fns[i] for i in indices])
+        other_metrics = metrics_from_tp_fp_fns([other_tp_fp_fns[i] for i in indices])
         for key in metrics:
             diffs.setdefault(key, []).append(metrics[key] - other_metrics[key])
     for key, values in sorted(diffs.items()):
         mean = statistics.mean(values)
         std = statistics.stdev(values) if len(values) > 1 else 0.0
-        print(f'{key:<10} {mean:.3f} ± {std:.3f}')
+        print(f"{key:<10} {mean:.3f} ± {std:.3f}")
 
 
 TP_FP_FN = Tuple[float, float, float]
 
 
 def metrics_from_tp_fp_fns(tp_fp_fns: List[TP_FP_FN]) -> Dict[str, float]:
-    precision = statistics.mean([
-        precision_score(tp, fp, fn) for tp, fp, fn in tp_fp_fns
-        if tp + fp > 0])
-    recall = statistics.mean([
-        recall_score(tp, fp, fn) for tp, fp, fn in tp_fp_fns
-        if tp + fn > 0])
+    precision = statistics.mean(
+        [precision_score(tp, fp, fn) for tp, fp, fn in tp_fp_fns if tp + fp > 0]
+    )
+    recall = statistics.mean(
+        [recall_score(tp, fp, fn) for tp, fp, fn in tp_fp_fns if tp + fn > 0]
+    )
     f1 = 2 * precision * recall / (precision + recall)
     return {
-        'f1': f1,
-        'precision': precision,
-        'recall': recall,
+        "f1": f1,
+        "precision": precision,
+        "recall": recall,
     }
 
 
 def precision_score(tp: float, fp: float, fn: float) -> float:
     if fp == fn == 0:
-        return 1.
+        return 1.0
     if tp == fp == 0:
-        return 0.
+        return 0.0
     return tp / (tp + fp)
 
 
 def recall_score(tp: float, fp: float, fn: float) -> float:
     if fp == fn == 0:
-        return 1.
+        return 1.0
     if tp == fn == 0:
-        return 0.
+        return 0.0
     return tp / (tp + fn)
 
 
@@ -152,17 +161,19 @@ def get_accuracy(true: str, pred: str) -> float:
 
 
 def string_shingle_matching(
-        true: str, pred: str, ngram_n: int = 4,
-        ) -> TP_FP_FN:
-    """ Compute TP/FP/FN across shingles (joined ngrams).
+    true: str,
+    pred: str,
+    ngram_n: int = 4,
+) -> TP_FP_FN:
+    """Compute TP/FP/FN across shingles (joined ngrams).
     Intended to be used for articleBody comparison,
     similar to the one used here (with shingles instead of tokens):
     https://moz.com/devblog/benchmarking-python-content-extraction-algorithms-dragnet-readability-goose-and-eatiht/
     """
     true_shingles = _all_shingles(true, ngram_n)
     pred_shingles = _all_shingles(pred, ngram_n)
-    tp = fp = fn = 0.
-    for key in (set(true_shingles) | set(pred_shingles)):
+    tp = fp = fn = 0.0
+    for key in set(true_shingles) | set(pred_shingles):
         true_count = true_shingles.get(key, 0)
         pred_count = pred_shingles.get(key, 0)
         tp += min(true_count, pred_count)
@@ -180,31 +191,30 @@ def _all_shingles(text: str, ngram_n: int) -> Dict[Tuple[str, ...], int]:
     return dict(Counter(_ngrams(text, ngram_n)))
 
 
-_TOKEN_RE = re.compile(
-    r'\w+', re.UNICODE | re.MULTILINE | re.IGNORECASE | re.DOTALL)
+_TOKEN_RE = re.compile(r"\w+", re.UNICODE | re.MULTILINE | re.IGNORECASE | re.DOTALL)
 
 
 def _tokenize(text: str) -> List[str]:
     # Note that such simple tokenization will work ok for any language,
     # even if several words will be clumped together, as we expect
     # that extra predicted text will still be separated.
-    return _TOKEN_RE.findall(text or '')
+    return _TOKEN_RE.findall(text or "")
 
 
 def _ngrams(text: str, n: int) -> List[Tuple[str, ...]]:
     tokens = _tokenize(text)
     result = []
     for i in range(0, max(1, len(tokens) - n + 1)):
-        shingle = tuple(tokens[i: i + n])
+        shingle = tuple(tokens[i : i + n])
         if shingle:
             result.append(shingle)
     return result
 
 
 def load_json(path: Path):
-    with path.open('rt', encoding='utf8') as f:
+    with path.open("rt", encoding="utf8") as f:
         return json.load(f)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
