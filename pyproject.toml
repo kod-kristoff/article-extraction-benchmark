@@ -1,0 +1,24 @@
+[project]
+name = "article-extraction-benchmark"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "goose3>=3.1.21",
+    "html-text>=0.7.1",
+    "html2text>=2025.4.15",
+    "inscriptis>=2.7.1",
+    "justext>=3.0.2",
+    "lxml<6",
+    "news-please>=1.6.16",
+    "readability-lxml>=0.8.4.1",
+    "resiliparse>=0.15.2",
+    "trafilatura>=2.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
