@@ -23,5 +23,5 @@ def main():
 
 
 if __name__ == "__main__":
-    with timer("beautifulsoup4", "Python"):
+    with timer("beautifulsoup", "Python"):
         main()

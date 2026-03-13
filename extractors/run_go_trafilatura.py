@@ -45,5 +45,5 @@ def main():
 
 
 if __name__ == "__main__":
-    with timer("go-trafilatura", "Go"):
+    with timer("go_trafilatura", "Go"):
         main()

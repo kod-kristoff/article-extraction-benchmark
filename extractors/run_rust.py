@@ -93,7 +93,8 @@ def run_backend(backend: str, output_name: str, urls: dict) -> None:
 def main() -> None:
     urls = load_urls()
     for backend, output_name in BACKENDS:
-        with timer(backend, "Rust"):
+        backend_out = output_name.split(".")[0]
+        with timer(backend_out, "Rust"):
             run_backend(backend, output_name, urls)
 
 

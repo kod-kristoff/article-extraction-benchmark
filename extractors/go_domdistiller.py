@@ -39,5 +39,5 @@ def main():
 
 
 if __name__ == "__main__":
-    with timer("go-domdistiller", "Go"):
+    with timer("go_domdistiller", "Go"):
         main()

@@ -39,5 +39,5 @@ def main():
 
 
 if __name__ == "__main__":
-    with timer("go-readability", "Go"):
+    with timer("go_readability", "Go"):
         main()

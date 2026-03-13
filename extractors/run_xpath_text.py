@@ -29,5 +29,5 @@ def main():
 
 
 if __name__ == "__main__":
-    with timer("xpath-text (lxml)", "Python"):
+    with timer("xpath-text", "Python"):
         main()
