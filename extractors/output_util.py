@@ -1,26 +1,40 @@
+import contextlib
 import json
 import re
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 
-def wrap_output(*, output: Dict[str, Dict[str, Any]], version: Optional[str]) -> Dict[str, Any]:
+def wrap_output(
+    *, output: Dict[str, Dict[str, Any]], version: Optional[str]
+) -> Dict[str, Any]:
     return {
         "version": version or "",
         "output": output,
     }
 
 
-def write_output_json(path: Path, *, output: Dict[str, Dict[str, Any]], version: Optional[str]) -> None:
+def write_output_json(
+    path: Path, *, output: Dict[str, Dict[str, Any]], version: Optional[str]
+) -> None:
     path.write_text(
-        json.dumps(wrap_output(output=output, version=version), sort_keys=True, ensure_ascii=False, indent=4),
+        json.dumps(
+            wrap_output(output=output, version=version),
+            sort_keys=True,
+            ensure_ascii=False,
+            indent=4,
+        ),
         encoding="utf8",
     )
 
 
 def python_dist_version(dist_name: str) -> Optional[str]:
     try:
-        from importlib.metadata import PackageNotFoundError, version  # type: ignore[attr-defined]
+        from importlib.metadata import (  # type: ignore[attr-defined]
+            PackageNotFoundError,
+            version,
+        )
     except Exception:  # pragma: no cover
         try:
             from importlib_metadata import PackageNotFoundError, version  # type: ignore
@@ -32,7 +46,9 @@ def python_dist_version(dist_name: str) -> Optional[str]:
         return None
 
 
-_GO_REQUIRE_RE = re.compile(r"^\\s*require\\s+(?P<module>\\S+)\\s+(?P<version>\\S+)\\s*$")
+_GO_REQUIRE_RE = re.compile(
+    r"^\\s*require\\s+(?P<module>\\S+)\\s+(?P<version>\\S+)\\s*$"
+)
 _GO_BLOCK_ENTRY_RE = re.compile(r"^\\s*(?P<module>\\S+)\\s+(?P<version>\\S+)\\s*$")
 
 
@@ -84,7 +100,9 @@ def node_dependency_version(package_json_path: Path, dep_name: str) -> Optional[
     return str(v) if v is not None else None
 
 
-def cargo_lock_package_version(cargo_lock_path: Path, package_name: str) -> Optional[str]:
+def cargo_lock_package_version(
+    cargo_lock_path: Path, package_name: str
+) -> Optional[str]:
     if not cargo_lock_path.exists():
         return None
     text = cargo_lock_path.read_text(encoding="utf8")
@@ -105,6 +123,18 @@ def cargo_lock_package_version(cargo_lock_path: Path, package_name: str) -> Opti
 
 
 def _cargo_field(block: str, field: str) -> Optional[str]:
-    m = re.search(rf'^{re.escape(field)}\\s*=\\s*\"([^\"]+)\"\\s*$', block, flags=re.MULTILINE)
+    m = re.search(
+        rf"^{re.escape(field)}\\s*=\\s*\"([^\"]+)\"\\s*$", block, flags=re.MULTILINE
+    )
     return m.group(1) if m else None
 
+
+@contextlib.contextmanager
+def timer(tool: str, lang: str) -> Any:
+    start = time.perf_counter()
+    yield
+    elapsed = time.perf_counter() - start
+    with Path(f"timings-{time.strftime('%Y-%m-%d')}.md").open(
+        "at", encoding="utf-8"
+    ) as fp:
+        print(f"`{tool}` | {lang} | {1000 * elapsed:.3f}ms", file=fp)

@@ -5,8 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from output_util import cargo_lock_package_version, write_output_json
-
+from output_util import cargo_lock_package_version, timer, write_output_json
 
 CLI_PATH = Path("extractors/rust_extractors/target/release/rust_extractors_cli")
 LOCK_PATH = Path("extractors/rust_extractors/Cargo.lock")
@@ -85,14 +84,17 @@ def run_backend(backend: str, output_name: str, urls: dict) -> None:
             content = normalize(result.stdout)
         output[item_id] = {"articleBody": content}
     package_name = BACKEND_TO_PACKAGE.get(backend)
-    version = cargo_lock_package_version(LOCK_PATH, package_name) if package_name else None
+    version = (
+        cargo_lock_package_version(LOCK_PATH, package_name) if package_name else None
+    )
     write_output_json(Path("output") / output_name, output=output, version=version)
 
 
 def main() -> None:
     urls = load_urls()
     for backend, output_name in BACKENDS:
-        run_backend(backend, output_name, urls)
+        with timer(backend, "Rust"):
+            run_backend(backend, output_name, urls)
 
 
 if __name__ == "__main__":
