@@ -1,0 +1,365 @@
+{
+    "august": {
+        "language": "Rust",
+        "timings_ns": [
+            1538043065,
+            1693540633,
+            1705322302,
+            1670469832,
+            1671036106,
+            1546719000
+        ],
+        "tool": "august"
+    },
+    "beautifulsoup": {
+        "language": "Python",
+        "timings_ns": [
+            7512056651,
+            7484483071,
+            8592654408,
+            7448528494,
+            8457520373,
+            7540494091,
+            6922482895
+        ],
+        "tool": "beautifulsoup4"
+    },
+    "boilerpipe_rs": {
+        "language": "Rust",
+        "timings_ns": [
+            1786765610,
+            1816448797,
+            1795568091,
+            1877675243,
+            1912608186,
+            1643323154
+        ],
+        "tool": "boilerpipe"
+    },
+    "dom_smoothie": {
+        "language": "Rust",
+        "timings_ns": [
+            1509805073,
+            1658353800,
+            1699938919,
+            1654190984,
+            1753086635,
+            1494184449
+        ],
+        "tool": "dom_smoothie"
+    },
+    "fast_html2md": {
+        "language": "Rust",
+        "timings_ns": [
+            1123520864,
+            1211305461,
+            1354417214,
+            1211328891,
+            1320819197,
+            1121997620
+        ],
+        "tool": "fast_html2md"
+    },
+    "go_domdistiller": {
+        "language": "Go",
+        "timings_ns": [
+            2687998480,
+            2649439037,
+            2891827632,
+            2506241268,
+            2854511888,
+            2811705541,
+            2369400901
+        ],
+        "tool": "go-domdistiller"
+    },
+    "go_readability": {
+        "language": "Go",
+        "timings_ns": [
+            2235707833,
+            1950245969,
+            2099112464,
+            1854261400,
+            2155008259,
+            2010941109,
+            1797971060
+        ],
+        "tool": "go-readability"
+    },
+    "go_readability_fork": {
+        "language": "Go",
+        "timings_ns": [
+            1733010369,
+            1577258879,
+            1891330770,
+            1553261669,
+            1836973605,
+            1685385398,
+            1603364308
+        ],
+        "tool": "go-readability-readeck"
+    },
+    "go_trafilatura": {
+        "language": "Go",
+        "timings_ns": [
+            32413516619,
+            31646632756,
+            34595841361,
+            30160444320,
+            31975104510,
+            36679505180,
+            30182136343,
+            28411941100
+        ],
+        "tool": "go-trafilatura"
+    },
+    "goose3": {
+        "language": "Python",
+        "timings_ns": [
+            21458780107,
+            22366344900,
+            24626860237,
+            22340074748,
+            24828131606,
+            22095463594,
+            20169292920
+        ],
+        "tool": "goose3"
+    },
+    "htmd": {
+        "language": "Rust",
+        "timings_ns": [
+            1639031762,
+            1793709238,
+            1831359089,
+            1708595580,
+            1851305135,
+            1586025984
+        ],
+        "tool": "htmd"
+    },
+    "html-text": {
+        "language": "Python",
+        "timings_ns": [
+            1641251729,
+            1522681360,
+            1784018165,
+            1490228558,
+            1608277945,
+            1517823733,
+            1357935153
+        ],
+        "tool": "html-text"
+    },
+    "html2md_rs": {
+        "language": "Rust",
+        "timings_ns": [
+            857569278,
+            806749811,
+            929416427,
+            972339433,
+            958467359,
+            839263525
+        ],
+        "tool": "html2md-rs"
+    },
+    "html2text": {
+        "language": "Python",
+        "timings_ns": [
+            6084512914,
+            6687703569,
+            6898355231,
+            7689356327,
+            6861370676,
+            6298469152,
+            5618479942
+        ],
+        "tool": "html2text"
+    },
+    "html2text_rs": {
+        "language": "Python",
+        "timings_ns": [
+            1488470276,
+            1502196253,
+            1804014915,
+            1649506722,
+            1686054290,
+            1457759478
+        ],
+        "tool": "html2text"
+    },
+    "inscriptis": {
+        "language": "Python",
+        "timings_ns": [
+            2883401968,
+            2991927790,
+            3197267371,
+            3993590851,
+            3191787428,
+            2922859980,
+            2770010301
+        ],
+        "tool": "inscriptis"
+    },
+    "justext": {
+        "language": "Python",
+        "timings_ns": [
+            4155822502,
+            4178348919,
+            4482957466,
+            4368251555,
+            4363055415,
+            4105360487,
+            3723074244
+        ],
+        "tool": "justext"
+    },
+    "llm_readability": {
+        "language": "Rust",
+        "timings_ns": [
+            1596150630,
+            1761704018,
+            1780365882,
+            1654352778,
+            1863527249,
+            1592473985
+        ],
+        "tool": "llm_readability"
+    },
+    "mdka": {
+        "language": "Rust",
+        "timings_ns": [
+            1415963354,
+            1485721415,
+            1535068722,
+            1445651119,
+            1613102204,
+            1390877591
+        ],
+        "tool": "mdka"
+    },
+    "nanohtml2text": {
+        "language": "Rust",
+        "timings_ns": [
+            1061977091,
+            1136451042,
+            1212858368,
+            1172797166,
+            1249765425,
+            1030748476
+        ],
+        "tool": "nanohtml2text"
+    },
+    "readability-lxml": {
+        "language": "Python",
+        "timings_ns": [
+            5526502756,
+            5127265793,
+            5762025465,
+            4885257577,
+            5442202942,
+            4919064365,
+            4391850708
+        ],
+        "tool": "readability-lxml"
+    },
+    "readability_js": {
+        "language": "Javascript",
+        "timings_ns": [
+            135393595322,
+            138175184209,
+            143665273975,
+            143764848335,
+            143355762451,
+            129281715938
+        ],
+        "tool": "readability-js"
+    },
+    "readability_rs": {
+        "language": "Rust",
+        "timings_ns": [
+            1461573982,
+            1625381450,
+            1727628327,
+            1636701299,
+            1682147476,
+            1442347796
+        ],
+        "tool": "readability"
+    },
+    "readabilityrs": {
+        "language": "Rust",
+        "timings_ns": [
+            14389107472,
+            15681151103,
+            16031493608,
+            15552897539,
+            15741867548,
+            13851668485
+        ],
+        "tool": "readabilityrs"
+    },
+    "readable_readability": {
+        "language": "Rust",
+        "timings_ns": [
+            1645137191,
+            1768096365,
+            1917900923,
+            1691066327,
+            1846597361,
+            1651000868
+        ],
+        "tool": "readable-readability"
+    },
+    "resiliparse": {
+        "language": "Python",
+        "timings_ns": [
+            497852923,
+            558263674,
+            569410736,
+            548914017,
+            576041362,
+            574824527,
+            491497710
+        ],
+        "tool": "resiliparse"
+    },
+    "rs_trafilatura": {
+        "language": "Rust",
+        "timings_ns": [
+            3019020362,
+            3191697803,
+            3376875115,
+            3225708560,
+            3606451547,
+            2871565037
+        ],
+        "tool": "rs_trafilatura"
+    },
+    "trafilatura": {
+        "language": "Python",
+        "timings_ns": [
+            4438232120,
+            4428202900,
+            4462340572,
+            4233374396,
+            4406564208,
+            4581361617,
+            3975275838
+        ],
+        "tool": "trafilatura"
+    },
+    "xpath-text": {
+        "language": "Python",
+        "timings_ns": [
+            996504363,
+            1068117867,
+            1103203905,
+            1177249979,
+            1133547738,
+            1162856834,
+            936911571
+        ],
+        "tool": "xpath-text (lxml)"
+    }
+}

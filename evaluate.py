@@ -4,16 +4,9 @@ import json
 import random
 import re
 import statistics
-<<<<<<< HEAD
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
-||||||| 7c60d68
-from typing import Any, Dict, Tuple, List
-=======
-from typing import Any, Dict, Tuple, List
-import importlib
->>>>>>> khoomeik-master
 
 
 def main():
@@ -34,34 +27,61 @@ def main():
     ground_truth = load_json(Path("ground-truth.json"))
     metrics_by_name = {}
 
+    timings = json.loads(Path("output/timings.json").read_text())
     print(
-        f"{'':<20} {'version':<12} {'F1':<13}  {'precision':<13}  {'recall':<13}  {'accuracy':<13}"
+        f"{'library':<20} | {'version':<12} | {'F1':<13} | {'precision':<13} | {'recall':<13} | {'accuracy':<13} | {'timing (s)':<13}"
     )
+    print("--- | --- | --- | --- | --- | --- | ---")
     for path in sorted(Path("output").glob("*.json")):
+        if str(path) == "output/timings.json":
+            continue
         name = path.stem
         prediction, version = load_prediction(path)
-        metrics = evaluate(ground_truth, prediction, args.n_bootstrap)
+        try:
+            metrics = evaluate(
+                ground_truth,
+                prediction,
+                args.n_bootstrap,
+                timings=timings.get(name, {}),
+            )
+        except ValueError:
+            print(f"ERROR error when evaluating '{name}' from '{path}'")
+            raise
         print(
-            "{name:<20} {version:<12} "
-            "{f1:.3f} ± {f1_std:.3f}  "
-            "{precision:.3f} ± {precision_std:.3f}  "
-            "{recall:.3f} ± {recall_std:.3f}  "
-            "{accuracy:.3f} ± {accuracy_std:.3f}".format(
+            "{name:<20} | {version:<12} | "
+            "{f1:.3f} ± {f1_std:.3f} | "
+            "{precision:.3f} ± {precision_std:.3f} | "
+            "{recall:.3f} ± {recall_std:.3f} | "
+            "{accuracy:.3f} ± {accuracy_std:.3f} | "
+            "{timing_s:.3f} ± {timing_s_std:.3f}".format(
                 name=name, version=version, **metrics
             )
         )
         metrics["version"] = version
 
-
-    for path in sorted(Path('output').glob('*.json')):
+    for path in sorted(Path("output").glob("*.json")):
+        if str(path) == "output/timings.json":
+            continue
         name = path.stem
-        metrics = evaluate(ground_truth, load_json(path), args.n_bootstrap)
-        print('{name:<20} '
-            'precision={precision:.3f} ± {precision_std:.3f}  '
-            'recall={recall:.3f} ± {recall_std:.3f}  '
-            'F1={f1:.3f} ± {f1_std:.3f} '
-            'accuracy={accuracy:.3f} ± {accuracy_std:.3f} '
-            .format(name=name, **metrics))
+        prediction, _version = load_prediction(path)
+        try:
+            metrics = evaluate(
+                ground_truth,
+                prediction,
+                args.n_bootstrap,
+                timings=timings.get(name, {}),
+            )
+        except ValueError:
+            print(f"ERROR error when evaluating '{name}' from '{path}'")
+            raise
+        print(
+            "{name:<20} "
+            "precision={precision:.3f} ± {precision_std:.3f}  "
+            "recall={recall:.3f} ± {recall_std:.3f}  "
+            "F1={f1:.3f} ± {f1_std:.3f}  "
+            "accuracy={accuracy:.3f} ± {accuracy_std:.3f} "
+            "{timing_s:.3f} ± {timing_s_std:.3f}".format(name=name, **metrics)
+        )
         metrics_by_name[name] = metrics
 
     if args.bootstrap_differences:
@@ -95,11 +115,22 @@ def evaluate(
     ground_truth: Dict[str, Dict],
     prediction: Dict[str, Dict],
     n_bootstrap: int,
+    timings: dict[str, Any],
 ) -> Dict[str, Any]:
     if ground_truth.keys() != prediction.keys():
+        ground_keys_not_in_prediction = set(ground_truth.keys()) - set(
+            prediction.keys()
+        )
+        prediction_keys_not_in_ground = set(prediction.keys()) - set(
+            ground_truth.keys()
+        )
+        print(
+            f"ERROR {ground_truth.keys()=} {prediction.keys()=} {ground_keys_not_in_prediction=} {prediction_keys_not_in_ground=}"
+        )
         raise ValueError("prediction keys do not match ground truth")
     tp_fp_fns = []
     accuracies = []
+    timings_s = [t / 1000000000.0 for t in timings.get("timings_ns", [])]
     for key in ground_truth.keys():
         true = ground_truth[key].get("articleBody", "")
         pred = prediction[key].get("articleBody", "")
@@ -108,6 +139,8 @@ def evaluate(
     metrics: Dict[str, Any] = metrics_from_tp_fp_fns(tp_fp_fns)
     metrics["tp_fp_fns"] = tp_fp_fns
     metrics["accuracy"] = statistics.mean(accuracies)
+    metrics["timing_s"] = statistics.mean(timings_s) if len(timings_s) > 1 else 0.0
+    metrics["timing_s_std"] = statistics.stdev(timings_s) if len(timings_s) > 2 else 0.0
 
     # add bootstrap estimates of condifence intervals
     b_values: Dict[str, List[float]] = {}
