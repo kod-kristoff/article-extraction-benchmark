@@ -34,6 +34,7 @@ run-python: setup
 	python extractors/run_readability.py
 	python extractors/run_trafilatura.py
 	python extractors/run_xpath_text.py
+	python extractors/run_resiliparse.py
 
 .PHONY: run-rust
 run-rust: setup
