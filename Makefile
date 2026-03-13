@@ -1,6 +1,6 @@
 .PHONY: setup
 setup:
-	pip install -r requirements.txt
+	uv pip install -r requirements.txt
 # for news_please:
 	python -m nltk.downloader --dir "${VIRTUAL_ENV}"/nltk_data punkt_tab
 	cd extractors/readability_js && npm install --no-audit --no-fund
