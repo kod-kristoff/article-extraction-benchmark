@@ -4,9 +4,16 @@ import json
 import random
 import re
 import statistics
+<<<<<<< HEAD
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+||||||| 7c60d68
+from typing import Any, Dict, Tuple, List
+=======
+from typing import Any, Dict, Tuple, List
+import importlib
+>>>>>>> khoomeik-master
 
 
 def main():
@@ -22,6 +29,7 @@ def main():
         help="run bootstrap for differences",
     )
     parser.add_argument("--output", type=Path, help="output results as json")
+
     args = parser.parse_args()
     ground_truth = load_json(Path("ground-truth.json"))
     metrics_by_name = {}
@@ -43,6 +51,17 @@ def main():
             )
         )
         metrics["version"] = version
+
+
+    for path in sorted(Path('output').glob('*.json')):
+        name = path.stem
+        metrics = evaluate(ground_truth, load_json(path), args.n_bootstrap)
+        print('{name:<20} '
+            'precision={precision:.3f} ± {precision_std:.3f}  '
+            'recall={recall:.3f} ± {recall_std:.3f}  '
+            'F1={f1:.3f} ± {f1_std:.3f} '
+            'accuracy={accuracy:.3f} ± {accuracy_std:.3f} '
+            .format(name=name, **metrics))
         metrics_by_name[name] = metrics
 
     if args.bootstrap_differences:
