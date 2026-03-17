@@ -4,3 +4,5 @@ venv
 .venv
 extractors/rust_extractors/target/
 timings-*.md
+.python-version
+site
