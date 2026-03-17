@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - run: mkdocs build --clean
+      - run: uv run mkdocs build --clean
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
