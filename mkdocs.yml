@@ -1,4 +1,5 @@
 site_name: Article Extraction Benchmark
+site_url: https://kod-kristoff.github.io/article-extraction-benchmark/
 markdown_extensions:
   - tables
 theme:
