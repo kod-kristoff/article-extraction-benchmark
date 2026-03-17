@@ -20,5 +20,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mkdocs<2",
+    "mkdocs-material>=9.7.5",
     "pytest>=9.0.2",
+    "zensical>=0.0.27",
 ]
+docs = []
